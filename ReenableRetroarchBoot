@@ -1,0 +1,4 @@
+#!/bin/sh
+rm /media/data/local/home/.reenableretroarch/dontbootretroarch.flag
+/sbin/poweroff
+

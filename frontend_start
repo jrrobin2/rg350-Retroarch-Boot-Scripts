@@ -1,0 +1,25 @@
+#!/bin/sh
+if [ -e /media/home/.reenableretroarch/dontbootretroarch.flag ]; then
+	/usr/bin/gmenu2x
+else
+	if dialog --stdout --timeout 2 --title "Load gmenu2X?" \
+        	  --backtitle "Boot Options" \
+         	 --yesno "Yes: Load gmenu2X, No: Load Retroarch\nAfter 2 seconds Retroarch will load automatically." 7 60; 
+	then
+	    echo "dontbootretroarch" > /media/home/.reenableretroarch/dontbootretroarch.flag
+	    /usr/bin/gmenu2x
+	else
+	    touch /media/home/filter.txt
+	    # Dirty script to locate the game rom and its core (The opendingux grep does not allow perl expressions)
+	    awk -F": " 'NR==11{print $2, $3}' /usr/local/home/.retroarch/content_history.lpl > /media/home/filter.txt
+	    awk -F": " 'NR==13{print $2, $3}' /usr/local/home/.retroarch/content_history.lpl >> /media/home/filter.txt
+ 
+	    PATH_GAME=$(awk -F"\"" 'NR==1{print $2}' /media/home/filter.txt)
+	    CORE_PATH=$(awk -F"\"" 'NR==2{print $2}' /media/home/filter.txt)
+	    rm /media/home/filter.txt
+ 
+	    /usr/local/bin/retroarch_rg350 -L "$CORE_PATH" "$PATH_GAME" 
+	    # when retroarch quits -> we turn it off
+	    /sbin/poweroff
+	fi
+fi
